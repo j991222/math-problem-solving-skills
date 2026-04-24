@@ -1,0 +1,4 @@
+interface:
+  display_name: "Math Problem Solving Skills"
+  short_description: "Dual-agent research math proof workflow"
+  default_prompt: "Use $math_problem_solving_skills to solve this math problem with high reasoning effort."
