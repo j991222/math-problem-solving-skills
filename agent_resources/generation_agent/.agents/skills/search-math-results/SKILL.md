@@ -31,11 +31,11 @@ Read:
 7. If the theorem is only a partial result for the current problem, analyze why its method does not immediately prove the full target statement. If it assumes extra hypotheses, do not merely try to force the current object to satisfy them; instead record why those hypotheses are used, where the proof breaks without them, and what obstruction or difficulty this reveals.
 8. Keep all downloaded PDFs and extracted text files inside `/AI4M/users/hcju/auto_agent/downloads`.
 9. Record not only what the theorem says, but also what its proof suggests for the current problem.
-10. If the theorem search returns no useful information, switch to Codex's built-in web search.
-11. Use the built-in web search either to look for specific math results or to gather background information, terminology, standard references, and canonical constructions/examples/counterexamples.
-12. If the built-in web search reveals a useful paper, again download it, extract its text, and read the relevant extracted text before using it in reasoning.
-13. If the built-in web search reveals a useful theorem, also read its proof, expand its local definitions from the paper context, and extract the techniques that look adaptable to the current statement.
-14. If the built-in web search reveals only a partial result, perform the same partial-result analysis: extra hypotheses, why the method needs them, why the method does not solve the full current problem, and what real difficulty is exposed.
+10. If the theorem search returns no useful information, switch to web search.
+11. Use web search either to look for specific math results or to gather background information, terminology, standard references, and canonical constructions/examples/counterexamples.
+12. If web search reveals a useful paper, again download it, extract its text, and read the relevant extracted text before using it in reasoning.
+13. If web search reveals a useful theorem, also read its proof, expand its local definitions from the paper context, and extract the techniques that look adaptable to the current statement.
+14. If web search reveals only a partial result, perform the same partial-result analysis: extra hypotheses, why the method needs them, why the method does not solve the full current problem, and what real difficulty is exposed.
 15. Summarize the most useful findings and explain why they matter for the current proof state.
 16. If a result may later be used in a proof, preserve its full statement and source identifiers so downstream proof steps can cite it explicitly.
 
@@ -48,11 +48,11 @@ Treat theorem-search results as useful only if they do at least one of the follo
 - suggest a standard technique or reformulation relevant to the current branch
 - expose a meaningful obstruction or extra hypothesis in a partial result that clarifies why the full problem is harder
 
-If the results are vague, off-topic, or too weak to guide the next step, fall back to the built-in web search.
+If the results are vague, off-topic, or too weak to guide the next step, fall back to web search.
 
 ## Output Contract
 
-Append a summary record to `events`:
+Append a summary entry to `{run_dir}/memory/events.md`:
 
 ```json
 {
@@ -84,15 +84,15 @@ Append a summary record to `events`:
 }
 ```
 
-## MCP Tools
+## Memory Files and Retrieval
 
-- `search_arxiv_theorems`
-- `memory_append`
-- `memory_search`
+- Use `search_arxiv_theorems` through the bundled theorem-search helper.
+- Query relevant memory by reading/searching Markdown files under `{run_dir}/memory/`.
+- Append retrieval summaries and useful references to `events.md`.
 
 ## Failure Logging
 
-If neither theorem search nor web search yields useful information, append an `events` record with:
+If neither theorem search nor web search yields useful information, append an `events.md` entry with:
 
 - `event_type="search_math_results_stalled"`
 - the attempted queries

@@ -26,7 +26,7 @@ Read from memory and current context:
 
 ## Output Contract
 
-Append each conclusion to `immediate_conclusions` with JSON object payload:
+Append each conclusion to `{run_dir}/memory/immediate_conclusions.md` with the following fields:
 
 ```json
 {
@@ -48,16 +48,16 @@ Rules:
 - If `is_fragile=true`, then `fragility_reason` must explain the risk and `suggested_followup` should be `construct-counterexamples`.
 - If `is_fragile=false`, use `fragility_reason=""` and `suggested_followup="none"`.
 
-## MCP Tools
+## Memory Files and Retrieval
 
-- `memory_append`
-- `memory_search`
-- `search_arxiv_theorems` for nontrivial consequences
-- Codex built-in web search for background definitions/terminology
+- Query relevant memory by reading/searching Markdown files under `{run_dir}/memory/`.
+- Append immediate consequences to `immediate_conclusions.md`.
+- Use `search_arxiv_theorems` through the bundled theorem-search helper for nontrivial consequences when retrieval is allowed.
+- Web search for background definitions/terminology
 
 ## Failure Logging
 
-If no meaningful consequence is found, append an `events` entry with:
+If no meaningful consequence is found, append an `events.md` entry with:
 
 - `event_type="immediate_conclusions_stalled"`
 - missing assumptions and suspected blockers

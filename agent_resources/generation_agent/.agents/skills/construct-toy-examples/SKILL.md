@@ -27,7 +27,7 @@ Read:
 
 ## Output Contract
 
-Append to `toy_examples`:
+Append to `{run_dir}/memory/toy_examples.md`:
 
 ```json
 {
@@ -42,17 +42,17 @@ Append to `toy_examples`:
 }
 ```
 
-## MCP Tools
+## Memory Files and Retrieval
 
-- `memory_append`
-- `memory_search`
-- `search_arxiv_theorems` for matching examples/known motifs
-- Codex built-in web search for known example families and standard constructions
+- Query relevant memory by reading/searching Markdown files under `{run_dir}/memory/`.
+- Append useful examples to `toy_examples.md`.
+- Use `search_arxiv_theorems` through the bundled theorem-search helper for matching examples/known motifs when retrieval is allowed.
+- Web search for known example families and standard constructions
 - use `$search-math-results` when broader retrieval is needed
 
 ## Failure Logging
 
-If generated examples are inconclusive, append an `events` record:
+If generated examples are inconclusive, append an `events.md` entry:
 
 - `event_type="toy_examples_inconclusive"`
 - include attempted example families

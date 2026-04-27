@@ -41,11 +41,11 @@ Do not split the proof with utility code. Read the markdown in order and use its
 8. Classify findings:
    - `critical_error`: logical contradiction, invalid theorem use, false implication.
    - `gap`: missing derivation, vague justification, unsupported step, unjustified existence or property assumptions about objects, suspiciously unused assumptions whose role is not justified, failure to distinguish between similar-looking definitions or formulas, or a hand-wavy deduction from one property to another.
-9. Persist each checked item to `statement_checks` using `memory_append`.
+9. Persist each checked item by appending a Markdown entry to `{run_dir}/memory/statement_checks.md`.
 
 ## Output Contract
 
-Append records to `statement_checks` with structure like:
+Append records to `{run_dir}/memory/statement_checks.md` with structure like:
 
 ```json
 {
@@ -60,7 +60,7 @@ Append records to `statement_checks` with structure like:
 }
 ```
 
-## MCP Tools
+## Memory Files
 
-- `memory_append`
-- `memory_query`
+- Append statement checks to `statement_checks.md`.
+- Query earlier checks by reading/searching `statement_checks.md` and `reference_checks.md` directly.

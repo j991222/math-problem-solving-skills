@@ -11,8 +11,8 @@ Produce the final verification output JSON and verdict.
 
 Read all findings from:
 
-- `statement_checks`
-- `reference_checks`
+- `{run_dir}/memory/statement_checks.md`
+- `{run_dir}/memory/reference_checks.md`
 
 Each issue must include `location` and `issue`.
 
@@ -27,8 +27,9 @@ Each issue must include `location` and `issue`.
    - `correct` iff `critical_errors=[]` and `gaps=[]`.
    - otherwise `wrong`.
 4. If verdict is `wrong`, produce concrete non-empty `repair_hints`.
-5. Validate the output via `validate_verification_output`.
-6. Persist output via `write_verification_output`.
+5. Validate the output by checking it against the output contract below.
+6. Write the final JSON to `{run_dir}/verification_iter_{iteration}.json`.
+7. Append a short summary of the verdict to `{run_dir}/memory/verification_reports.md`.
 
 ## Output Contract
 
@@ -48,9 +49,8 @@ Final output JSON:
 
 If there is any error or gap, verdict must be `"wrong"` and `repair_hints` must be non-empty.
 
-## MCP Tools
+## Memory Files
 
-- `memory_query`
-- `memory_append`
-- `validate_verification_output`
-- `write_verification_output`
+- Query checks by reading/searching `statement_checks.md` and `reference_checks.md`.
+- Append the final verdict summary to `verification_reports.md`.
+- Write the required final JSON directly to `{run_dir}/verification_iter_{iteration}.json`.

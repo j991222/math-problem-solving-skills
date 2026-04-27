@@ -31,7 +31,7 @@ Read:
 
 ## Output Contract
 
-Append to `failed_paths`:
+Append to `{run_dir}/memory/failed_paths.md`:
 
 ```json
 {
@@ -48,14 +48,14 @@ Append to `failed_paths`:
 }
 ```
 
-Also append an `events` record indicating that a new planning round is needed.
+Also append an `events.md` entry indicating that a new planning round is needed.
 
-## MCP Tools
+## Memory Files
 
-- `memory_search`
-- `memory_append`
-- `branch_update`
+- Query relevant memory by reading/searching Markdown files under `{run_dir}/memory/`.
+- Append synthesized failures to `failed_paths.md`.
+- Append branch-state implications to `branch_states.md` when relevant.
 
 ## Failure Logging
 
-If the reports are too weak to identify meaningful common failures, append an `events` record with `event_type="key_failures_inconclusive"` and state what information is still missing.
+If the reports are too weak to identify meaningful common failures, append an `events.md` entry with `event_type="key_failures_inconclusive"` and state what information is still missing.

@@ -6,6 +6,14 @@ You are the generation agent in a dual-agent math-solving system. Your job is to
 {run_dir}/blueprint.md
 ```
 
+Before doing anything else, initialize the shell environment:
+
+```bash
+source /root/root/bashrc
+```
+
+If the runtime launches a fresh shell for each command, run commands that depend on that environment from a shell where `/root/root/bashrc` has been sourced.
+
 ## Inputs
 
 The master agent provides:
@@ -41,7 +49,7 @@ The bundled generation subskills are:
 
 Do not verify the final proof yourself and do not call a verification service. When a full candidate proof exists, return `STATUS: candidate_ready`; the master agent will spawn a separate clean-context verification agent.
 
-Some bundled generation subskills mention MCP tools. In this OpenClaw package, do not require custom MCP tools. When a bundled subskill asks for `search_arxiv_theorems`, use the theorem-search helper instead.
+Some bundled generation subskills mention old memory actions. In this OpenClaw package, do not require custom memory tools. Implement memory writing, memory querying, and branch updates by reading and appending Markdown files under `{run_dir}/memory/`. When a bundled subskill asks for `search_arxiv_theorems`, use the theorem-search helper instead.
 
 ## Retrieval Mode
 
@@ -59,26 +67,38 @@ Phrase the query as a complete mathematical statement whenever possible. If the 
 
 ## Memory and Artifacts
 
-Persist useful work under the run directory. Create local files under:
+Persist useful work under the run directory. Create local Markdown files under:
 
 ```text
 {run_dir}/memory/
 ```
 
-Useful channels include:
+Use these memory files:
 
-- `immediate_conclusions`
-- `toy_examples`
-- `counterexamples`
-- `big_decisions`
-- `subgoals`
-- `proof_steps`
-- `failed_paths`
-- `verification_reports`
-- `branch_states`
-- `events`
+- `immediate_conclusions.md`
+- `toy_examples.md`
+- `counterexamples.md`
+- `big_decisions.md`
+- `subgoals.md`
+- `proof_steps.md`
+- `failed_paths.md`
+- `verification_reports.md`
+- `branch_states.md`
+- `events.md`
+
+Do not use a programmatic memory database or external memory tools. When a subskill says:
+
+- `memory_append`: append a readable Markdown entry to the corresponding `{run_dir}/memory/<channel>.md` file.
+- `memory_search` or `memory_query`: read or search the relevant `{run_dir}/memory/<channel>.md` files and summarize the useful hits in reasoning.
+- `branch_update`: append the latest branch state to `{run_dir}/memory/branch_states.md`; include `branch_id`, status, active plan, blockers, and next action when available.
+
+Each appended memory entry should include a short heading, iteration number, timestamp if available, relevant `branch_id` or `subgoal_id`, and the mathematical content. JSON blocks may be included inside Markdown when a subskill gives a JSON-shaped output contract, but the stored artifact is still a Markdown file.
 
 ## Work Strategy
+
+One iteration is one long generation phase under the retrieval mode supplied by the master agent. You may work for a long time, revise `blueprint.md` repeatedly, and receive verification reports on candidate blueprints multiple times inside the same iteration. A failed verification report is feedback for continuing the same iteration; it does not by itself mean the next iteration has started.
+
+End the current iteration only when you decide that this long attempt should stop without a verified solution, in which case return `STATUS: stuck` or `STATUS: no_solution`. Use `STATUS: candidate_ready` only to ask the master agent to run clean-context verification on the current candidate blueprint.
 
 At the start of each iteration, assess:
 
@@ -133,4 +153,4 @@ STATUS: no_solution
 
 Also include a short summary of what changed and the path to `blueprint.md` if it exists.
 
-Use `candidate_ready` only when `blueprint.md` contains a full candidate proof of the whole problem.
+Use `candidate_ready` only when `blueprint.md` contains a full candidate proof of the whole problem. Use `stuck` or `no_solution` only when you have decided to terminate the current long generation iteration, not merely because one candidate failed verification.

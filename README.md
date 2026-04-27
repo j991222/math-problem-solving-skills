@@ -18,19 +18,19 @@ math-problem-solving-skills/
 │   └── openai.yaml
 ├── references/
 │   ├── generation-agent-workflow.md
-│   └── verification-agent-workflow.md
+│   ├── verification-agent-workflow.md
+│   └── verified-blueprint-template.tex
 ├── agent_resources/
 │   ├── generation_agent/
 │   │   └── .agents/skills/
 │   └── verify_agent/
 │       └── .agents/skills/
 └── scripts/
-    ├── blueprint_to_latex.py
     ├── search_arxiv_theorems.py
     └── compile_latex.sh
 ```
 
-The generation and verification subskills are bundled under `agent_resources/*/.agents/skills/`. The generation-side `verify-proof` subskill is intentionally excluded because verification is handled by a separate clean-context subagent. Datasets, old setup scripts, API wrappers, MCP servers, verification services, and computation experiments are intentionally excluded.
+The generation and verification subskills are bundled under `agent_resources/*/.agents/skills/`. The generation-side `verify-proof` subskill is intentionally excluded because verification is handled by a separate clean-context subagent. Datasets, old setup scripts, API wrappers, verification services, and computation experiments are intentionally excluded.
 
 ## Installation
 
@@ -65,6 +65,12 @@ openclaw skills list
 
 ## Usage
 
+The skill first initializes its shell environment with:
+
+```bash
+source /root/root/bashrc
+```
+
 Invoke the skill with a math problem and optional effort.
 
 ```text
@@ -81,23 +87,30 @@ If reasoning effort is omitted, the skill uses `high`.
 
 | Effort | Maximum Iterations | Behavior |
 | --- | ---: | --- |
-| `low` | 1 | One generation attempt, with verification if a candidate appears |
-| `medium` | 5 | Up to five generation and verification iterations |
-| `high` | 10 | Up to ten generation and verification iterations |
+| `low` | 1 | One long generation phase, with verification cycles if candidates appear |
+| `medium` | 5 | Up to five long generation phases |
+| `high` | 10 | Up to ten long generation phases |
+
+One iteration means the generation agent works for a long time under one fixed retrieval mode. During that iteration it may produce several candidate blueprints, receive clean-context verification reports through the master agent, and continue repairing the same blueprint. Failed verification does not consume a new iteration. The iteration ends only when a candidate verifies or when the generation agent itself decides to stop the current long attempt and returns `stuck` or `no_solution`.
 
 Generation iteration `0` allows retrieval. After that, odd iterations forbid web search and theorem search, while even iterations allow retrieval again.
 
 ## Workflow
 
-1. The master agent creates a local run directory such as `math_problem_runs/{run_id}/`.
-2. The generation agent uses the bundled generation skills to write `blueprint.md`.
-3. When a candidate blueprint exists, the master agent starts a clean-context verification agent.
-4. The verification agent uses the bundled verification skills and writes `verification_iter_{n}.json`.
-5. If verification fails, the report is sent back to the generation agent for another iteration.
-6. If verification passes, `blueprint.md` is renamed to `blueprint_verified.md`.
-7. The verified blueprint is converted to LaTeX and compiled to `blueprint_verified.pdf`.
+1. The master agent sources `/root/root/bashrc`.
+2. The master agent creates a local run directory such as `math_problem_runs/{run_id}/`.
+3. The generation agent sources `/root/root/bashrc` and uses the bundled generation skills to write or revise `blueprint.md` during a long iteration.
+4. When a candidate blueprint exists, the master agent starts a clean-context verification agent.
+5. The verification agent sources `/root/root/bashrc`, uses the bundled verification skills, and writes `verification_iter_{n}.json`.
+6. If verification fails, the report is sent back to the same generation agent inside the same iteration.
+7. If the generation agent itself stops without a verified solution, the master agent starts the next iteration if the effort limit permits.
+8. If verification passes, `blueprint.md` is renamed to `blueprint_verified.md`.
+9. The agent writes `blueprint_verified.tex` directly from the verified Markdown blueprint using `references/verified-blueprint-template.tex`; this is not done by a programmatic Markdown-to-LaTeX converter.
+10. The authored LaTeX is compiled to `blueprint_verified.pdf` and checked for professional paper-style formatting before return.
 
 The skill never treats an attempt as solved unless the clean-context verifier returns `correct` with no critical errors and no gaps.
+
+The old memory-tool behavior is implemented with plain Markdown files. Agents append memories to `math_problem_runs/{run_id}/memory/*.md` and query memory by reading or searching those files. Examples include `immediate_conclusions.md`, `big_decisions.md`, `toy_examples.md`, `counterexamples.md`, `subgoals.md`, `proof_steps.md`, `failed_paths.md`, `verification_reports.md`, `branch_states.md`, `events.md`, `statement_checks.md`, and `reference_checks.md`. No external memory service or programmatic memory database is required.
 
 ## Outputs
 
@@ -107,6 +120,7 @@ A successful run produces:
 math_problem_runs/{run_id}/blueprint_verified.md
 math_problem_runs/{run_id}/blueprint_verified.tex
 math_problem_runs/{run_id}/blueprint_verified.pdf
+math_problem_runs/{run_id}/memory/*.md
 ```
 
 Unsuccessful runs keep the best available working artifacts:
@@ -127,4 +141,4 @@ python3 scripts/search_arxiv_theorems.py --query "complete mathematical statemen
 
 The helper posts to `https://leansearch.net/thm/search` and returns normalized JSON with `title`, `theorem`, `arxiv_id`, and `theorem_id` fields.
 
-For PDF generation, install either `latexmk` or `pdflatex`. If LaTeX is unavailable, the skill still produces the verified Markdown and `.tex` file.
+For PDF generation, install either `latexmk` or `pdflatex`. After a blueprint is verified, the agent authors `blueprint_verified.tex` as professional math-paper LaTeX from the verified Markdown blueprint and compiles it. The agent should not use a programmatic Markdown-to-LaTeX converter for this final artifact. If LaTeX is unavailable, the skill still produces the verified Markdown and authored `.tex` file.

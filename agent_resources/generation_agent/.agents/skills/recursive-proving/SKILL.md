@@ -28,7 +28,7 @@ Read:
    - the instruction to follow `AGENTS.md`
 4. Tell each sub-agent to tackle the assigned plan under the instructions in `AGENTS.md`, treating that plan as its starting point rather than restarting the search from zero. If new evidence or discoveries justify it, the sub-agent may refine, extend, or locally revise the plan, but it should preserve continuity with the assigned plan instead of discarding it outright.
 5. Tell each sub-agent that it may itself spawn sub-agents recursively if that helps its assigned plan.
-6. Require each sub-agent to write progress, failures, and any successful proof development back into the shared memory using the same `decl_id` as the MCP `problem_id`.
+6. Require each sub-agent to write progress, failures, and any successful proof development back into the shared Markdown memory files under `{run_dir}/memory/`, using the same problem identifier in its headings when needed.
 7. Wait for all sub-agents to finish, then gather their reports.
 8. If any plan succeeds, assemble the proof draft from that plan.
 9. If all plans fail, hand the collected reports to `$identify-key-failures`.
@@ -51,16 +51,16 @@ Append an `events` record for the recursive round:
 }
 ```
 
-Update `branch_states` with the recursive round status and per-plan outcomes.
+Append to `{run_dir}/memory/branch_states.md` with the recursive round status and per-plan outcomes.
 
-## Tools
+## Memory Files and Tools
 
-- `memory_search`
-- `memory_append`
-- `branch_update`
-- `search_arxiv_theorems`
-- Codex sub-agent tools: `spawn_agent`, `send_input`, `wait_agent`, `close_agent`
+- Query relevant memory by reading/searching Markdown files under `{run_dir}/memory/`.
+- Append recursive-round events to `events.md`.
+- Append branch outcomes to `branch_states.md`.
+- Use `search_arxiv_theorems` through the bundled theorem-search helper only when retrieval is allowed.
+- Sub-agent tools: `spawn_agent`, `send_input`, `wait_agent`, `close_agent`
 
 ## Failure Logging
 
-If every plan fails in the recursive round, append a summary record to `failed_paths` and immediately invoke `$identify-key-failures`.
+If every plan fails in the recursive round, append a summary entry to `{run_dir}/memory/failed_paths.md` and immediately invoke `$identify-key-failures`.

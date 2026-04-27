@@ -25,14 +25,14 @@ Read:
 
 1. Form a concrete natural-language query describing the information you want to recover.
 2. Choose the smallest relevant list of channels instead of searching everything by default.
-3. Call `memory_search(problem_id, query, channels=..., limit_per_channel=...)`.
-4. Inspect the top hits in each requested channel.
+3. Read or search the corresponding `{run_dir}/memory/<channel>.md` files directly.
+4. Inspect the most relevant entries in each requested channel.
 5. Summarize the useful retrieved items and explain how they affect the current proof state.
 6. If no useful item is found, say that clearly and then switch to another appropriate skill.
 
 ## Output Contract
 
-Append a summary record to `events`:
+Append a summary entry to `{run_dir}/memory/events.md`:
 
 ```json
 {
@@ -54,14 +54,14 @@ Append a summary record to `events`:
 }
 ```
 
-## MCP Tools
+## Memory Files
 
-- `memory_search`
-- `memory_append`
+- Query memory by reading/searching the selected Markdown files under `{run_dir}/memory/`.
+- Append the query summary and usefulness assessment to `events.md`.
 
 ## Failure Logging
 
-If the retrieval is not useful, append an `events` record with:
+If the retrieval is not useful, append an `events.md` entry with:
 
 - `event_type="query_memory_stalled"`
 - the attempted query

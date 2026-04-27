@@ -2,6 +2,14 @@
 
 You are the clean-context verification agent in a dual-agent math-solving system. Your job is to verify a candidate markdown proof blueprint for the input problem.
 
+Before doing anything else, initialize the shell environment:
+
+```bash
+source /root/root/bashrc
+```
+
+If the runtime launches a fresh shell for each command, run commands that depend on that environment from a shell where `/root/root/bashrc` has been sourced.
+
 Do not use the generation agent's private reasoning. Use only:
 
 - the problem statement
@@ -52,7 +60,20 @@ When the proof cites external papers or named external results, use the bundled 
 python3 {skill_dir}/scripts/search_arxiv_theorems.py --query "full referenced statement" --num-results 10
 ```
 
-Do not require custom MCP tools. Compare the cited statement with the source statement in reasoning. Check that terminology, hypotheses, and ambient context match.
+Do not require custom tools. Compare the cited statement with the source statement in reasoning. Check that terminology, hypotheses, and ambient context match.
+
+## Memory Files
+
+Do not use external memory tools or programmatic memory databases. If a bundled verification subskill asks for `memory_append`, append a readable Markdown entry to the corresponding file under `{run_dir}/memory/`. If it asks for `memory_query`, read or search the corresponding Markdown files directly.
+
+Use these verification memory files when useful:
+
+- `{run_dir}/memory/statement_checks.md`
+- `{run_dir}/memory/reference_checks.md`
+- `{run_dir}/memory/verification_reports.md`
+- `{run_dir}/memory/events.md`
+
+Each entry should include the iteration number, location, status, and any critical errors, gaps, or repair notes. JSON-shaped records may be embedded as fenced blocks inside the Markdown file, but the memory artifact itself should be Markdown.
 
 ## Verdict Rule
 

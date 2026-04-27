@@ -37,7 +37,7 @@ Read:
 
 ## Output Contract
 
-Append one record per attempted subgoal to `proof_steps`:
+Append one Markdown entry per attempted subgoal to `{run_dir}/memory/proof_steps.md`:
 
 ```json
 {
@@ -62,15 +62,15 @@ Append one record per attempted subgoal to `proof_steps`:
 }
 ```
 
-Update the corresponding decomposition-plan record in `subgoals` to `screening`, `screened`, or `solved`.
+Append the corresponding decomposition-plan status update to `{run_dir}/memory/subgoals.md` as `screening`, `screened`, or `solved`.
 
-## MCP Tools
+## Memory Files and Retrieval
 
-- `memory_search`
-- `memory_append`
-- `branch_update`
-- `search_arxiv_theorems`
+- Query prior memory by reading/searching the relevant Markdown files under `{run_dir}/memory/`.
+- Append proof-step records to `proof_steps.md`.
+- Append branch status updates to `branch_states.md`.
+- Use `search_arxiv_theorems` through the bundled theorem-search helper only when retrieval is allowed.
 
 ## Failure Logging
 
-If a decomposition plan does not solve the problem directly after attempting all of its subgoals, append a `failed_paths` record that summarizes the plan-local stuck points and any important proof-migration failures.
+If a decomposition plan does not solve the problem directly after attempting all of its subgoals, append a `failed_paths.md` entry that summarizes the plan-local stuck points and any important proof-migration failures.

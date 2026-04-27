@@ -29,17 +29,17 @@ For each cited external theorem/lemma/definition:
 9. Treat a logically invalid transition from the cited theorem to the claimed conclusion as a critical error.
 10. If that downstream step deduces one property from another, compare the exact definitions and defining formulas of both properties before accepting the deduction.
 11. If the theorem exists but the current proof uses different definitions, hypotheses, ambient objects, or a subtly different defining formula, record a critical error for incorrect application.
-12. If no match is found, use Codex's built-in web search with the same statement text. Do not call an MCP `web_search` tool; this MCP server intentionally does not expose one.
+12. If no match is found, use web search with the same statement text.
 13. If still not found, emit a critical error:
    - location: where the citation is used,
    - issue: referenced theorem appears non-existent or incorrectly cited.
-14. Persist each reference check in `reference_checks`.
+14. Persist each reference check by appending a Markdown entry to `{run_dir}/memory/reference_checks.md`.
 
 Do not rely on dedicated comparison utility code; perform comparison through careful reasoning.
 
 ## Output Contract
 
-Append records to `reference_checks` like:
+Append records to `{run_dir}/memory/reference_checks.md` like:
 
 ```json
 {
@@ -58,7 +58,7 @@ Append records to `reference_checks` like:
 }
 ```
 
-## MCP Tools
+## Memory Files and Retrieval
 
-- `search_arxiv_theorems`
-- `memory_append`
+- Use `search_arxiv_theorems` through the bundled theorem-search helper.
+- Append reference checks to `reference_checks.md`.

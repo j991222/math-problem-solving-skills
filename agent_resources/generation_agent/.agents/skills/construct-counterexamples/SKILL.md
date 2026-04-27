@@ -31,7 +31,7 @@ Read:
 
 ## Output Contract
 
-Append to `counterexamples`:
+Append to `{run_dir}/memory/counterexamples.md`:
 
 ```json
 {
@@ -46,9 +46,9 @@ Append to `counterexamples`:
 }
 ```
 
-If `status="refuted"`, also append to `failed_paths` when it kills a branch.
+If `status="refuted"`, also append to `{run_dir}/memory/failed_paths.md` when it kills a branch.
 
-If the search produced a concrete non-refuting example, also append a record to `toy_examples`:
+If the search produced a concrete non-refuting example, also append a record to `{run_dir}/memory/toy_examples.md`:
 
 ```json
 {
@@ -65,16 +65,16 @@ If the search produced a concrete non-refuting example, also append a record to 
 
 Do this whenever the constructed example is useful enough to test future claims or clarify the current branch, even if it did not refute the target claim.
 
-## MCP Tools
+## Memory Files and Retrieval
 
-- `memory_append`
-- `memory_search`
-- `branch_update`
-- Codex built-in web search and `search_arxiv_theorems` to find standard counterexample patterns
+- Query relevant memory by reading/searching Markdown files under `{run_dir}/memory/`.
+- Append counterexamples to `counterexamples.md`.
+- Append killed branches or invalidated plans to `failed_paths.md` and `branch_states.md`.
+- Web search and `search_arxiv_theorems` to find standard counterexample patterns
 - reuse stored counterexamples to test future conjectures/claims
 
 ## Failure Logging
 
-If no meaningful counterexample space is identified, append:
+If no meaningful counterexample space is identified, append to `{run_dir}/memory/events.md`:
 
 - `events.event_type="counterexample_space_unclear"`

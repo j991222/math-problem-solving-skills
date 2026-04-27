@@ -29,7 +29,7 @@ Read:
 
 ## Output Contract
 
-Append one record per plan to `subgoals`:
+Append one Markdown entry per plan to `{run_dir}/memory/subgoals.md`:
 
 ```json
 {
@@ -50,18 +50,18 @@ Append one record per plan to `subgoals`:
 }
 ```
 
-Also append an `events` record summarizing the new plan set.
+Also append an `events.md` entry summarizing the new plan set.
 
-## MCP Tools
+## Memory Files and Retrieval
 
-- `memory_search`
-- `memory_append`
-- `branch_update`
-- `search_arxiv_theorems`
+- Query relevant memory by reading/searching Markdown files under `{run_dir}/memory/`.
+- Append decomposition plans to `subgoals.md`.
+- Append branch state changes to `branch_states.md`.
+- Use `search_arxiv_theorems` through the bundled theorem-search helper only when retrieval is allowed.
 
 ## Failure Logging
 
-If the agent cannot yet propose meaningful decomposition plans, append an `events` record with:
+If the agent cannot yet propose meaningful decomposition plans, append an `events.md` entry with:
 
 - `event_type="decomposition_plans_not_ready"`
 - the missing information
