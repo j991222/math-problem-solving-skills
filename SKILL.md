@@ -26,17 +26,6 @@ Resolve paths relative to this skill directory.
 - arXiv theorem-search API helper: `scripts/search_arxiv_theorems.py`
 - LaTeX compiler helper: `scripts/compile_latex.sh`
 
-
-## Runtime Notes
-
-Before doing anything else for this skill, initialize the shell environment by running:
-
-```bash
-source /root/root/bashrc
-```
-
-If the runtime launches a fresh shell for each command, make sure commands that depend on that environment are run from a shell where `/root/root/bashrc` has been sourced. Tell spawned generation and verification agents to source `/root/root/bashrc` before their own work begins.
-
 ## Effort Policy
 
 Map reasoning effort to the maximum number of generation iterations:
@@ -88,38 +77,35 @@ Use Markdown files for memory. Do not require external memory tools or a program
 
 ## Master Workflow
 
-1. Source `/root/root/bashrc` before any other action.
-2. Normalize the user input into a complete problem statement and effort level.
-3. Create the run directory and write `problem.md`.
-4. Start iteration `0` by spawning a long-running generation agent. Give it:
+1. Normalize the user input into a complete problem statement and effort level.
+2. Create the run directory and write `problem.md`.
+3. Start iteration `0` by spawning a long-running generation agent. Give it:
    - the problem statement
    - the run directory path
    - the current iteration number
    - the current retrieval mode
    - the generation workflow file path
    - the bundled generation skill directory path
-   - the instruction to source `/root/root/bashrc` before doing anything else
-5. The generation agent must try to produce or revise `blueprint.md` in the run directory until it either requests verification of a candidate or decides to terminate the current iteration. It should return one of:
+4. The generation agent must try to produce or revise `blueprint.md` in the run directory until it either requests verification of a candidate or decides to terminate the current iteration. It should return one of:
    - `candidate_ready`: a full candidate proof blueprint exists
    - `stuck`: it has worked through the current long attempt, made meaningful partial progress, and has decided to terminate this iteration without a verified solution
    - `no_solution`: it has worked through the current long attempt and has decided to terminate this iteration without useful progress
-6. Whenever `candidate_ready` is returned, spawn a verification agent with clean context. Give it only:
+5. Whenever `candidate_ready` is returned, spawn a verification agent with clean context. Give it only:
    - the problem statement
    - the candidate `blueprint.md` content or path
    - the run directory path
    - the current iteration number
    - the verification workflow file path
    - the bundled verification skill directory path
-   - the instruction to source `/root/root/bashrc` before doing anything else
-7. Treat verification as passing only when the verification verdict is `correct` and both `critical_errors` and `gaps` are empty.
-8. If verification passes:
+6. Treat verification as passing only when the verification verdict is `correct` and both `critical_errors` and `gaps` are empty.
+7. If verification passes:
    - rename `blueprint.md` to `blueprint_verified.md`
    - author `blueprint_verified.tex` by hand from `blueprint_verified.md` using `references/verified-blueprint-template.tex` as the starting structure
    - compile `blueprint_verified.pdf`
    - return the PDF path and the verified blueprint path to the user
-9. If verification fails, append the verification report to `iteration_log.md`, pass the report back to the same generation agent, and continue the same iteration under the same retrieval mode.
-10. If the generation agent returns `stuck` or `no_solution`, append the stuck/no-solution summary to `iteration_log.md`; only then continue to the next iteration if the effort limit permits.
-11. If the maximum iteration count is reached without a passing verification, return the best available artifacts and clearly say that the result is not verified.
+8. If verification fails, append the verification report to `iteration_log.md`, pass the report back to the same generation agent, and continue the same iteration under the same retrieval mode.
+9. If the generation agent returns `stuck` or `no_solution`, append the stuck/no-solution summary to `iteration_log.md`; only then continue to the next iteration if the effort limit permits.
+10. If the maximum iteration count is reached without a passing verification, return the best available artifacts and clearly say that the result is not verified.
 
 Do not claim the problem is solved unless the clean-context verification agent passes the blueprint.
 

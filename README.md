@@ -65,12 +65,6 @@ openclaw skills list
 
 ## Usage
 
-The skill first initializes its shell environment with:
-
-```bash
-source /root/root/bashrc
-```
-
 Invoke the skill with a math problem and optional effort.
 
 ```text
@@ -97,16 +91,15 @@ Generation iteration `0` allows retrieval. After that, odd iterations forbid web
 
 ## Workflow
 
-1. The master agent sources `/root/root/bashrc`.
-2. The master agent creates a local run directory such as `math_problem_runs/{run_id}/`.
-3. The generation agent sources `/root/root/bashrc` and uses the bundled generation skills to write or revise `blueprint.md` during a long iteration.
-4. When a candidate blueprint exists, the master agent starts a clean-context verification agent.
-5. The verification agent sources `/root/root/bashrc`, uses the bundled verification skills, and writes `verification_iter_{n}.json`.
-6. If verification fails, the report is sent back to the same generation agent inside the same iteration.
-7. If the generation agent itself stops without a verified solution, the master agent starts the next iteration if the effort limit permits.
-8. If verification passes, `blueprint.md` is renamed to `blueprint_verified.md`.
-9. The agent writes `blueprint_verified.tex` directly from the verified Markdown blueprint using `references/verified-blueprint-template.tex`; this is not done by a programmatic Markdown-to-LaTeX converter.
-10. The authored LaTeX is compiled to `blueprint_verified.pdf` and checked for professional paper-style formatting before return.
+1. The master agent creates a local run directory such as `math_problem_runs/{run_id}/`.
+2. The generation agent uses the bundled generation skills to write or revise `blueprint.md` during a long iteration.
+3. When a candidate blueprint exists, the master agent starts a clean-context verification agent.
+4. The verification agent uses the bundled verification skills and writes `verification_iter_{n}.json`.
+5. If verification fails, the report is sent back to the same generation agent inside the same iteration.
+6. If the generation agent itself stops without a verified solution, the master agent starts the next iteration if the effort limit permits.
+7. If verification passes, `blueprint.md` is renamed to `blueprint_verified.md`.
+8. The agent writes `blueprint_verified.tex` directly from the verified Markdown blueprint using `references/verified-blueprint-template.tex`; this is not done by a programmatic Markdown-to-LaTeX converter.
+9. The authored LaTeX is compiled to `blueprint_verified.pdf` and checked for professional paper-style formatting before return.
 
 The skill never treats an attempt as solved unless the clean-context verifier returns `correct` with no critical errors and no gaps.
 

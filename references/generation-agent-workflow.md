@@ -6,14 +6,6 @@ You are the generation agent in a dual-agent math-solving system. Your job is to
 {run_dir}/blueprint.md
 ```
 
-Before doing anything else, initialize the shell environment:
-
-```bash
-source /root/root/bashrc
-```
-
-If the runtime launches a fresh shell for each command, run commands that depend on that environment from a shell where `/root/root/bashrc` has been sourced.
-
 ## Inputs
 
 The master agent provides:
