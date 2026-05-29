@@ -69,6 +69,9 @@ Use a stable `run_id` such as a timestamp plus a short problem hash. Store all r
 - `verification_iter_{n}.json`
 - `blueprint_verified.tex`
 - `blueprint_verified.pdf`
+- `best_available_artifacts.md`
+- `best_available_artifacts.tex`
+- `best_available_artifacts.pdf`
 - `memory/*.md`
 
 Never write generated problem artifacts into `agent_resources/`.
@@ -102,10 +105,10 @@ Use Markdown files for memory. Do not require external memory tools or a program
    - rename `blueprint.md` to `blueprint_verified.md`
    - author `blueprint_verified.tex` by hand from `blueprint_verified.md` using `references/verified-blueprint-template.tex` as the starting structure
    - compile `blueprint_verified.pdf`
-   - return the PDF path and the verified blueprint path to the user
+   - immediately return the actual `blueprint_verified.pdf` file and the actual `blueprint_verified.md` file to the user; do not merely print or report their filesystem paths
 8. If verification fails, append the verification report to `iteration_log.md`, pass the report back to the same generation agent, and continue the same iteration under the same retrieval mode.
 9. If the generation agent returns `stuck` or `no_solution`, append the stuck/no-solution summary to `iteration_log.md`; only then continue to the next iteration if the effort limit permits.
-10. If the maximum iteration count is reached without a passing verification, return the best available artifacts and clearly say that the result is not verified.
+10. If the maximum iteration count is reached without a passing verification, synthesize the best available work into `best_available_artifacts.md`, author `best_available_artifacts.tex`, compile `best_available_artifacts.pdf`, and immediately return the actual `best_available_artifacts.pdf` file to the user; do not merely print or report its filesystem path. Clearly say that the result is not verified.
 
 Do not claim the problem is solved unless the clean-context verification agent passes the blueprint.
 
@@ -173,4 +176,17 @@ path/to/scripts/compile_latex.sh path/to/run/blueprint_verified.tex path/to/run
 
 Before returning, inspect `blueprint_verified.tex`. If it is not valid professional LaTeX, if it looks like raw Markdown, or if it compresses or omits essential proof content from `blueprint_verified.md`, rewrite it from the template and recompile.
 
-If LaTeX tooling is unavailable or compilation fails after reasonable repair attempts, still return `blueprint_verified.md` and `blueprint_verified.tex`, and state that PDF compilation failed.
+On success, return the actual `blueprint_verified.pdf` and `blueprint_verified.md` files to the user immediately. Do not only provide file paths.
+
+## Failure Return
+
+If no verified blueprint is produced within the allowed number of iterations, create a user-facing best-available artifact:
+
+1. Write `path/to/run/best_available_artifacts.md` from the best current `blueprint.md`, `iteration_log.md`, verifier reports, and relevant memory files.
+2. State clearly at the top that the artifact is not verified and may contain gaps or errors.
+3. Include the problem statement, the best partial solution or candidate blueprint, known verification failures, remaining gaps, and any useful partial progress.
+4. Author `path/to/run/best_available_artifacts.tex` as valid, readable LaTeX.
+5. Compile `path/to/run/best_available_artifacts.pdf`.
+6. Return the actual `best_available_artifacts.pdf` file to the user immediately. Do not only provide its filesystem path.
+
+If LaTeX tooling is unavailable or PDF compilation fails after reasonable repair attempts, return the actual available Markdown and TeX files and state that PDF compilation failed. Do not merely print paths when the runtime supports returning files.
