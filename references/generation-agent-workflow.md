@@ -19,6 +19,8 @@ The master agent provides:
 - current `iteration_log.md`, if any
 - current `blueprint.md`, if any
 - latest verification report, if any
+- the latest user paper request and conversational proof corrections, when the
+  user asks for a paper after interactive revisions
 
 ## Bundled Subskills
 
@@ -37,7 +39,32 @@ The bundled generation subskills are:
 - `direct-proving`
 - `recursive-proving`
 - `identify-key-failures`
+- `write-paper` (post-source manuscript production only)
+- `revise-paper` (post-draft selective revision only)
 
+
+Use `write-paper` only when the user or master agent explicitly requests a paper
+from an existing `blueprint.md`, `blueprint_verified.md`, or
+`best_available_artifacts.md`. The last input is allowed only when the master
+explicitly selects it after the proof-search iteration limit; never auto-select it.
+Do not invoke `write-paper` during proof search merely because a candidate blueprint
+exists. Its whole-paper checks cover the rewritten manuscript and do not replace
+the master's separate clean-context verification of the proof blueprint.
+
+When an explicit paper request follows multiple conversational proof revisions,
+first consolidate the latest complete proof into `blueprint.md`. Apply the newest
+user correction over every older proof version. Pass that exact file explicitly to
+`write-paper`; do not select an older `blueprint_verified.md` just because it has a
+verified filename. Verification applies only to the exact content checked by the
+verifier, so a later mathematical change must use `source_status:
+unverified-blueprint` until the changed proof passes verification.
+
+Use `revise-paper` when the user supplies or identifies an existing TeX manuscript
+and asks for revisions. Its first turn is review-only: return independently
+selectable suggestions and do not edit the TeX. On a later turn, apply only the
+suggestions or exact changes the user selects. Do not rerun `write-paper`, perform a
+general rewrite, or change any unapproved location. A completed revision must
+return the actual revised TeX and a freshly compiled PDF.
 
 Do not verify the final proof yourself and do not call a verification service. When a full candidate proof exists, return `STATUS: candidate_ready`; the master agent will spawn a separate clean-context verification agent.
 

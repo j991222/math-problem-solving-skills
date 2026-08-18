@@ -1,0 +1,60 @@
+# PROJECT_BRIEF
+
+> Per-paper framing and constraints. Mathematics and uncertainty come only from
+> the selected source. Do not use this file to introduce or repair mathematical
+> claims.
+
+## Source
+
+source_path: <absolute or run-relative source path>
+source_status: <verified-blueprint | unverified-blueprint | unverified-best-available>
+headline_source_heading: <the source heading for the main result>
+
+## Title / Working Title
+
+<operator-supplied title, or a literal neutral working title>
+
+## Audience and Venue
+
+<target readers, journal, or arXiv category; blank when unspecified>
+
+## Authors and Affiliations
+
+<operator-supplied human authors and affiliations; blank means use the required
+author placeholder and an author blocker>
+
+## Scope
+
+<headline result(s), support results to foreground, and intended contribution>
+
+## Structural Exemplar
+
+structural_exemplar: <one folder under paper/style/anchors, or blank>
+
+## Per-Paper Style Overrides
+
+<explicit overrides only; do not infer preferences>
+
+## Automated-Assistance Disclosure
+
+enabled: true
+public_system_name: <optional; blank uses a generic description>
+final-paper-verification_statement: <blank unless true and operator-approved>
+
+## Funding and Personal Thanks
+
+funding: <exact operator text or blank>
+personal_thanks: <exact operator text or blank>
+
+## Deadline / Status
+
+<draft, submission target, or deadline>
+
+## Best-Available Draft Warning
+
+<required plain-language warning when source_status is unverified-best-available;
+otherwise blank>
+
+## Notes
+
+<other non-mathematical instructions>

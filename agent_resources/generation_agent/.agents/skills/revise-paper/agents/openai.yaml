@@ -1,0 +1,4 @@
+interface:
+  display_name: "Revise Paper"
+  short_description: "Review first, then revise only approved TeX areas"
+  default_prompt: "Use $revise-paper to review this TeX paper and propose selectable revisions without editing it yet."

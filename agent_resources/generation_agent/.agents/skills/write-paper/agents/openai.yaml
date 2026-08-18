@@ -1,0 +1,4 @@
+interface:
+  display_name: "Write Paper"
+  short_description: "Turn a math source into a checked LaTeX paper"
+  default_prompt: "Use $write-paper to turn the selected mathematical source into a polished, compiled paper."

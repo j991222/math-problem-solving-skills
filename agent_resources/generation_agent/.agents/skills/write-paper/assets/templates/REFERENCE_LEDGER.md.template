@@ -1,0 +1,23 @@
+# REFERENCE_LEDGER
+
+Every row represents an external result or contextual source actually used by the
+selected source or paper. Missing metadata stays blank. Never promote a row from
+memory.
+
+<!--
+## CitationKey-or-candidate-N
+- authors:
+- title:
+- venue:
+- year:
+- arxiv:
+- doi:
+- source_url:
+- cited_for:
+- source_location:
+- verified-by: unverified | verifier | operator
+- status: active | corrected | rejected | unverifiable | retarget-internal
+- notes:
+-->
+
+_(no reference candidates recorded yet)_

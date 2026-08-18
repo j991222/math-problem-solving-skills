@@ -1,0 +1,15 @@
+# REVISION_LOG
+
+Append-only, newest entry first. Record observed results rather than expectations.
+
+<!--
+## <UTC timestamp> - <writer | reviser | reference-auditor | reference-verifier | math-verifier>
+- trigger:
+- changed:
+- preserved source units:
+- citation changes:
+- open or handed off:
+- static check:
+- compile:
+- whole-paper verification:
+-->

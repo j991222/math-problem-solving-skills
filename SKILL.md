@@ -20,11 +20,12 @@ Resolve paths relative to this skill directory.
 
 - Generation agent workflow: `references/generation-agent-workflow.md`
 - Verification agent workflow: `references/verification-agent-workflow.md`
-- Verified blueprint LaTeX template: `references/verified-blueprint-template.tex`
+- Paper-writing skill: `agent_resources/generation_agent/.agents/skills/write-paper/SKILL.md`
+- Selective paper-revision skill: `agent_resources/generation_agent/.agents/skills/revise-paper/SKILL.md`
 - Bundled generation subskills: `agent_resources/generation_agent/.agents/skills/`
 - Bundled verification subskills: `agent_resources/verify_agent/.agents/skills/`
 - arXiv theorem-search API helper: `scripts/search_arxiv_theorems.py`
-- LaTeX compiler helper: `scripts/compile_latex.sh`
+- Paper compile gate: `agent_resources/generation_agent/.agents/skills/write-paper/scripts/compile_verify.sh`
 
 ## Effort Policy
 
@@ -67,11 +68,15 @@ Use a stable `run_id` such as a timestamp plus a short problem hash. Store all r
 - `blueprint.md`
 - `blueprint_verified.md`
 - `verification_iter_{n}.json`
-- `blueprint_verified.tex`
-- `blueprint_verified.pdf`
 - `best_available_artifacts.md`
-- `best_available_artifacts.tex`
-- `best_available_artifacts.pdf`
+- `paper/PROJECT_BRIEF.md`
+- `paper/REFERENCE_LEDGER.md`
+- `paper/REVISION_LOG.md`
+- `paper/VERIFY_LEDGER.md`
+- `paper/SOURCE_MAP.json`
+- `paper/main.tex`
+- `paper/main.pdf`
+- `paper/checks/*`
 - `memory/*.md`
 
 Never write generated problem artifacts into `agent_resources/`.
@@ -103,14 +108,55 @@ Use Markdown files for memory. Do not require external memory tools or a program
 6. Treat verification as passing only when the verification verdict is `correct` and both `critical_errors` and `gaps` are empty.
 7. If verification passes:
    - rename `blueprint.md` to `blueprint_verified.md`
-   - author `blueprint_verified.tex` by hand from `blueprint_verified.md` using `references/verified-blueprint-template.tex` as the starting structure
-   - compile `blueprint_verified.pdf`
-   - immediately return the actual `blueprint_verified.pdf` file and the actual `blueprint_verified.md` file to the user; do not merely print or report their filesystem paths
+   - immediately read and execute the bundled `write-paper` skill with `blueprint_verified.md` as its explicit source and `{run_dir}/paper/` as its workspace
+   - require the writing workflow to produce and compile `{run_dir}/paper/main.tex` and `{run_dir}/paper/main.pdf`; do not use the former direct template conversion path
+   - immediately return the actual `main.tex` and `main.pdf` files to the user; do not merely print or report their filesystem paths
 8. If verification fails, append the verification report to `iteration_log.md`, pass the report back to the same generation agent, and continue the same iteration under the same retrieval mode.
 9. If the generation agent returns `stuck` or `no_solution`, append the stuck/no-solution summary to `iteration_log.md`; only then continue to the next iteration if the effort limit permits.
-10. If the maximum iteration count is reached without a passing verification, synthesize the best available work into `best_available_artifacts.md`, author `best_available_artifacts.tex`, compile `best_available_artifacts.pdf`, and immediately return the actual `best_available_artifacts.pdf` file to the user; do not merely print or report its filesystem path. Clearly say that the result is not verified.
+10. If the maximum iteration count is reached without a passing verification, synthesize the best available work into `best_available_artifacts.md`, then immediately read and execute the bundled `write-paper` skill with that file as its explicit `unverified-best-available` source and `{run_dir}/paper/` as its workspace. Require the writing workflow to produce and compile `{run_dir}/paper/main.tex` and `{run_dir}/paper/main.pdf`, with a visible statement that the manuscript is unverified and may contain gaps or errors. Immediately return the actual `main.tex` and `main.pdf` files to the user; do not merely print or report their filesystem paths. Clearly say that the result is not verified.
 
 Do not claim the problem is solved unless the clean-context verification agent passes the blueprint.
+
+## User-Requested Paper After Proof Revisions
+
+Treat a user request to write the paper as an explicit `write-paper` request even
+when it arrives after several conversational proof and correction rounds. Before
+invoking the writing skill:
+
+1. Reconstruct the latest complete proof state from the current conversation and
+   the current run artifacts. Apply proof replacements and corrections in
+   chronological order; the user's newest correction overrides older agent text.
+2. Materialize that consolidated proof as `{run_dir}/blueprint.md`. Do not pass a
+   loose collection of chat fragments to `write-paper`, and do not silently fall
+   back to an older complete proof merely because it already exists on disk.
+3. Use `blueprint_verified.md` with `source_status: verified-blueprint` only when
+   the exact current proof content is the content that received a passing
+   clean-context verdict. A later change to a statement, hypothesis, proof step,
+   calculation, or conclusion invalidates that inherited status until the changed
+   proof is verified again.
+4. If the latest proof has not been verified in its exact current form, explicitly
+   select `{run_dir}/blueprint.md` with `source_status: unverified-blueprint`. Keep
+   any older `blueprint_verified.md` unchanged as historical evidence; never let it
+   override the newer proof.
+5. Invoke `write-paper` with the selected source path explicitly. Do not rely on
+   filename priority or modification time to choose between proof versions.
+
+If the latest corrections are contradictory or insufficient to reconstruct one
+complete proof, ask a focused question instead of combining incompatible versions
+or writing from a stale proof.
+
+## User-Requested Revision of Existing TeX
+
+When the user supplies or identifies an already-written `.tex` manuscript and asks
+to revise it, load and follow the bundled `revise-paper` skill. Do not rerun
+`write-paper` or regenerate the manuscript from a blueprint.
+
+On the first revision turn, inspect the current TeX and return selectable, located
+suggestions only; do not edit any file. After the user explicitly selects a subset
+or gives another exact edit, change only that approved footprint. Treat all
+unmentioned text as user-owned and finalized. Every completed revision turn must
+pass the revision scope gate and return the actual updated TeX and freshly compiled
+PDF files.
 
 ## Retrieval Alternation
 
@@ -150,6 +196,13 @@ Use a clean context for verification. Do not fork the generation agent context. 
 
 The verifier must be strict: `correct` iff there are no critical errors and no gaps.
 
+During `write-paper` finalization, the same verification-agent role may be spawned
+in a fresh context for the whole-paper check described by
+`agent_resources/generation_agent/.agents/skills/write-paper/references/roles/PAPER_MATH_VERIFIER.md`.
+Give that verifier only the final `main.tex`, confirmed reference-ledger rows, the
+paper-verifier prompt, and its standing role contract. This remains a verification
+agent; it does not create a third agent role.
+
 ## Finalization
 
 After successful verification, rename the verified blueprint:
@@ -158,25 +211,27 @@ After successful verification, rename the verified blueprint:
 mv path/to/run/blueprint.md path/to/run/blueprint_verified.md
 ```
 
-Then author `path/to/run/blueprint_verified.tex` directly from `blueprint_verified.md`.
+Immediately load and follow:
 
-- Use `references/verified-blueprint-template.tex` as the starting structure unless a better paper-style preamble is clearly needed.
-- Do not use a programmatic Markdown-to-LaTeX converter.
-- Write valid LaTeX that reads like a professional mathematics paper, not a line-by-line rendering of Markdown.
-- Preserve the verified blueprint's mathematical content, theorem statement, definitions, lemmas, propositions, proof structure, labels, hypotheses, and logical dependencies.
-- Convert blueprint sections into LaTeX sections and theorem/proof environments.
-- Keep formulas as real LaTeX math; do not leave escaped Markdown artifacts such as `\#`, raw `#` headings, or escaped dollar signs in running text.
-- Do not introduce new mathematical claims that were not in the verified blueprint unless they are purely expository and do not affect correctness.
-
-After writing `blueprint_verified.tex`, compile it:
-
-```bash
-path/to/scripts/compile_latex.sh path/to/run/blueprint_verified.tex path/to/run
+```text
+agent_resources/generation_agent/.agents/skills/write-paper/SKILL.md
 ```
 
-Before returning, inspect `blueprint_verified.tex`. If it is not valid professional LaTeX, if it looks like raw Markdown, or if it compresses or omits essential proof content from `blueprint_verified.md`, rewrite it from the template and recompile.
+Invoke it with:
 
-On success, return the actual `blueprint_verified.pdf` and `blueprint_verified.md` files to the user immediately. Do not only provide file paths.
+- source: `path/to/run/blueprint_verified.md`
+- source status: `verified-blueprint`
+- paper workspace: `path/to/run/paper/`
+
+Follow the complete write-paper workflow, including source mapping, reference
+ledger, professional paper drafting, static checks, strict compilation, reference
+audit, targeted revision, and whole-paper checking. The final manuscript is a new
+artifact: upstream blueprint verification does not by itself verify the rewritten
+paper. Do not fall back to the old direct template conversion.
+
+Do not finish finalization until `path/to/run/paper/main.tex` exists and the strict
+compile gate has produced `path/to/run/paper/main.pdf`. Then immediately return the
+actual `main.tex` and `main.pdf` files to the user. Do not only provide paths.
 
 ## Failure Return
 
@@ -185,8 +240,9 @@ If no verified blueprint is produced within the allowed number of iterations, cr
 1. Write `path/to/run/best_available_artifacts.md` from the best current `blueprint.md`, `iteration_log.md`, verifier reports, and relevant memory files.
 2. State clearly at the top that the artifact is not verified and may contain gaps or errors.
 3. Include the problem statement, the best partial solution or candidate blueprint, known verification failures, remaining gaps, and any useful partial progress.
-4. Author `path/to/run/best_available_artifacts.tex` as valid, readable LaTeX.
-5. Compile `path/to/run/best_available_artifacts.pdf`.
-6. Return the actual `best_available_artifacts.pdf` file to the user immediately. Do not only provide its filesystem path.
+4. Immediately load and follow the bundled `write-paper` skill with `best_available_artifacts.md` as the explicit source, `source_status: unverified-best-available`, and `path/to/run/paper/` as the workspace.
+5. Require the generated `paper/main.tex` to state visibly that it is an unverified draft that may contain gaps or errors. Known failed arguments must remain identified as failures; they must not be rewritten as established results.
+6. Run the write-paper static checks and strict compile gate to produce `path/to/run/paper/main.pdf`.
+7. Return the actual `paper/main.tex` and `paper/main.pdf` files to the user immediately. Do not only provide their filesystem paths. State clearly that the manuscript is not verified.
 
-If LaTeX tooling is unavailable or PDF compilation fails after reasonable repair attempts, return the actual available Markdown and TeX files and state that PDF compilation failed. Do not merely print paths when the runtime supports returning files.
+If LaTeX tooling is unavailable or PDF compilation fails after reasonable repair attempts, return the actual available source Markdown and `paper/main.tex`, include the compile failure, and state that no PDF was produced. Do not merely print paths when the runtime supports returning files.

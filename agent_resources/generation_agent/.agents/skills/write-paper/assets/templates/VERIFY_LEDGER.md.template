@@ -1,0 +1,14 @@
+# VERIFY_LEDGER - Whole-Paper Mathematical Verification
+
+## whole-paper
+- source_status: <verified-blueprint | unverified-blueprint | unverified-best-available>
+- verification_mode: <not-run | same-context | clean-context>
+- verifier_status: <not-run | verify-error | checked>
+- verdict: <unknown | correct | wrong | too-large | operator-overridden>
+- attempts: 0
+- must_fix: []
+- ignorable: []
+- checked_artifact:
+- checked_at:
+- deliver_ok: false
+- notes:
